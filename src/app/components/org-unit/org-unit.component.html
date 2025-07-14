@@ -1,0 +1,52 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Organisation Unit Level</mat-label>
+    <mat-select formControlName="level">
+      @for ( lvl of levelOptions() ; track lvl.id) {
+      <mat-option [value]="lvl">{{ lvl.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Region</mat-label>
+    <input matInput formControlName="level1" [matAutocomplete]="auto1" />
+    <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayFn">
+      @for ( unit of level1Options(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>District</mat-label>
+    <input
+      matInput
+      formControlName="level2"
+      [matAutocomplete]="auto2"
+      (input)="filterLevel2Options($event)"
+    />
+    <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
+      @for ( unit of level2FilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Level 3 Unit</mat-label>
+    <input
+      matInput
+      formControlName="level3"
+      [matAutocomplete]="auto3"
+      (input)="filterLevel3Options($event)"
+    />
+    <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
+      @for ( unit of level3FilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <button type="submit" mat-raised-button>Submit</button>
+</form>
