@@ -63,7 +63,6 @@ export class OrgUnitComponent implements OnInit {
     // Control enabling/disabling inputs based on level selected
     level$.subscribe((level) => {
       const lvl = level?.level ?? 0;
-      console.log('Selected Level:', lvl);
       this.updateFormState(lvl);
     });
 

@@ -1,0 +1,67 @@
+<form [formGroup]="form" class="p-4">
+  <!-- Level Selector -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Select Level</mat-label>
+    <mat-select formControlName="level">
+      @for (lvl of levels(); track lvl.id) {
+      <mat-option [value]="lvl">
+        {{ lvl.name }}
+      </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Level 2 -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Level 2 (Region)</mat-label>
+    <input
+      type="text"
+      matInput
+      [matAutocomplete]="auto2"
+      formControlName="level2Unit"
+    />
+    <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
+      @for (region of level2Units(); track region.id) {
+      <mat-option [value]="region">
+        {{ region.name }}
+      </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <!-- Level 3 -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Level 3 (District)</mat-label>
+    <input
+      type="text"
+      matInput
+      [matAutocomplete]="auto3"
+      formControlName="level3Filter"
+    />
+    <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
+      @for (district of level2FilteredUnits(); track district.id) {
+      <mat-option [value]="district">
+        {{ district.name }}
+      </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <!-- Level 4 -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Level 4 (Commune)</mat-label>
+    <input
+      type="text"
+      matInput
+      [matAutocomplete]="auto4"
+      formControlName="level4Unit"
+    />
+    <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
+      @for (commune of level4Units(); track commune.id) {
+      <mat-option [value]="commune">
+        {{ commune.name }}
+      </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</form>

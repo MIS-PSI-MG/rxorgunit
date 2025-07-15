@@ -6,4 +6,9 @@ export const routes: Routes = [
     path: '',
     component: OrgUnitComponent,
   },
+  {
+    path: 'sou',
+    loadComponent: () =>
+      import('./components/sou/sou.component').then((m) => m.SouComponent),
+  },
 ];
