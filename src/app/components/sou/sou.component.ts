@@ -8,7 +8,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { OrganisationUnit } from '../../models/organisationUnit.interface';
 import { OrganisationUnitLevel as OrgUnitLevel } from '../../models/organisationUnitLevel.interface';
 import { OuExtService as OrgUnitService } from '../../services/ou-ext.service';
-import { startWith } from 'rxjs';
+import { map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-sou',
@@ -41,10 +41,6 @@ export class SouComponent {
       value: null,
       disabled: true,
     }),
-
-    level2Filter: '',
-    level3Filter: '',
-    level4Filter: '',
   });
 
   levels = signal<OrgUnitLevel[] | null>(null);
@@ -53,10 +49,6 @@ export class SouComponent {
   level2Units = signal<OrganisationUnit[]>([]);
   level3Units = signal<OrganisationUnit[]>([]);
   level4Units = signal<OrganisationUnit[]>([]);
-
-  level2FilteredUnits = signal<OrganisationUnit[]>([]);
-  level3FilteredUnits = signal<OrganisationUnit[]>([]);
-  level4FilteredUnits = signal<OrganisationUnit[]>([]);
 
   ngOnInit(): void {
     this.orgService.getOrganisationUnitLevels().subscribe(this.levels.set);
@@ -89,7 +81,7 @@ export class SouComponent {
     this.form
       .get('level2Unit')!
       .valueChanges.subscribe((selected: OrganisationUnit | null) => {
-        this.form.patchValue({ level3Unit: null, level4Unit: null });
+        this.form.patchValue({ level3Unit: null });
         if (selected) {
           const units = this.allUnits();
           this.level3Units.set(
@@ -113,39 +105,16 @@ export class SouComponent {
           this.level4Units.set([]);
         }
       });
-
-    this.form
-      .get('level2Filter')!
-      .valueChanges.pipe(startWith(''))
-      .subscribe((text) => {
-        const all = this.level2Units();
-        const filtered = all.filter((u) =>
-          u.name.toLowerCase().includes(text!.toLowerCase())
-        );
-        this.level2FilteredUnits.set(filtered);
-      });
-
-    this.form
-      .get('level3Filter')!
-      .valueChanges.pipe(startWith(''))
-      .subscribe((text) => {
-        const all = this.level3Units();
-        const filtered = all.filter((u) =>
-          u.name.toLowerCase().includes(text!.toLowerCase())
-        );
-        this.level3FilteredUnits.set(filtered);
-      });
-
-    this.form
-      .get('level4Filter')!
-      .valueChanges.pipe(startWith(''))
-      .subscribe((text) => {
-        const all = this.level4Units();
-        const filtered = all.filter((u) =>
-          u.name.toLowerCase().includes(text!.toLowerCase())
-        );
-        this.level4FilteredUnits.set(filtered);
-      });
   }
   displayFn = (unit?: OrganisationUnit): string => (unit ? unit.name : '');
+  private _filter(
+    value: string,
+    options: OrganisationUnit[]
+  ): OrganisationUnit[] {
+    const filterValue = value.toLowerCase();
+
+    return options.filter((option) =>
+      option.name.toLowerCase().includes(filterValue)
+    );
+  }
 }

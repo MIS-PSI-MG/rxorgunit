@@ -36,10 +36,10 @@
       type="text"
       matInput
       [matAutocomplete]="auto3"
-      formControlName="level3Filter"
+      formControlName="level3Unit"
     />
     <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
-      @for (district of level2FilteredUnits(); track district.id) {
+      @for (district of level3Units(); track district.id) {
       <mat-option [value]="district">
         {{ district.name }}
       </mat-option>
