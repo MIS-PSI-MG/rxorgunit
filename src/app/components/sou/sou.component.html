@@ -18,10 +18,18 @@
       type="text"
       matInput
       [matAutocomplete]="auto2"
-      formControlName="level2Unit"
+      formControlName="level2Filter"
     />
-    <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
-      @for (region of level2Units(); track region.id) {
+    @if(form.get('level2Filter')!.value) {
+    <button mat-icon-button matSuffix (click)="clearSelection('level2')">
+      <mat-icon>close</mat-icon></button
+    >}
+    <mat-autocomplete
+      #auto2="matAutocomplete"
+      [displayWith]="displayFn"
+      (optionSelected)="onOptionSelected($event.option.value, 2)"
+    >
+      @for (region of level2FilteredUnits(); track region.id) {
       <mat-option [value]="region">
         {{ region.name }}
       </mat-option>
@@ -36,10 +44,18 @@
       type="text"
       matInput
       [matAutocomplete]="auto3"
-      formControlName="level3Unit"
+      formControlName="level3Filter"
     />
-    <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
-      @for (district of level3Units(); track district.id) {
+    @if(form.get('level3Filter')!.value) {
+    <button mat-icon-button matSuffix (click)="clearSelection('level3')">
+      <mat-icon>close</mat-icon></button
+    >}
+    <mat-autocomplete
+      #auto3="matAutocomplete"
+      [displayWith]="displayFn"
+      (optionSelected)="onOptionSelected($event.option.value, 3)"
+    >
+      @for (district of level3FilteredUnits(); track district.id) {
       <mat-option [value]="district">
         {{ district.name }}
       </mat-option>
@@ -54,10 +70,14 @@
       type="text"
       matInput
       [matAutocomplete]="auto4"
-      formControlName="level4Unit"
+      formControlName="level4Filter"
     />
+    @if(form.get('level4Filter')!.value) {
+    <button mat-icon-button matSuffix (click)="clearSelection('level4')">
+      <mat-icon>close</mat-icon></button
+    >}
     <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
-      @for (commune of level4Units(); track commune.id) {
+      @for (commune of level4FilteredUnits(); track commune.id) {
       <mat-option [value]="commune">
         {{ commune.name }}
       </mat-option>
