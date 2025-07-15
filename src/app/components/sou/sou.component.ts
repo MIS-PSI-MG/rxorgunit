@@ -45,6 +45,15 @@ export class SouComponent {
       value: null,
       disabled: true,
     }),
+    level5Unit: this.fb.control<OrganisationUnit | null>({
+      value: null,
+      disabled: true,
+    }),
+    level6Unit: this.fb.control<OrganisationUnit | null>({
+      value: null,
+      disabled: true,
+    }),
+
     level2Filter: this.fb.control<OrganisationUnit | string | null>({
       value: null,
       disabled: true,
@@ -57,6 +66,14 @@ export class SouComponent {
       value: null,
       disabled: true,
     }),
+    level5Filter: this.fb.control<OrganisationUnit | string | null>({
+      value: null,
+      disabled: true,
+    }),
+    level6Filter: this.fb.control<OrganisationUnit | string | null>({
+      value: null,
+      disabled: true,
+    }),
   });
 
   levels = signal<OrgUnitLevel[] | null>(null);
@@ -65,10 +82,14 @@ export class SouComponent {
   level2Units = signal<OrganisationUnit[]>([]);
   level3Units = signal<OrganisationUnit[]>([]);
   level4Units = signal<OrganisationUnit[]>([]);
+  level5Units = signal<OrganisationUnit[]>([]);
+  level6Units = signal<OrganisationUnit[]>([]);
 
   level2FilteredUnits = signal<OrganisationUnit[]>([]);
   level3FilteredUnits = signal<OrganisationUnit[]>([]);
   level4FilteredUnits = signal<OrganisationUnit[]>([]);
+  level5FilteredUnits = signal<OrganisationUnit[]>([]);
+  level6FilteredUnits = signal<OrganisationUnit[]>([]);
 
   displayFn = (unit?: OrganisationUnit): string => (unit ? unit.name : '');
 
@@ -94,11 +115,15 @@ export class SouComponent {
           level2Filter: '',
           level3Filter: '',
           level4Filter: '',
+          level5Filter: '',
+          level6Filter: '',
         });
 
         this.form.get('level2Filter')?.disable();
         this.form.get('level3Filter')?.disable();
         this.form.get('level4Filter')?.disable();
+        this.form.get('level5Filter')?.disable();
+        this.form.get('level6Filter')?.disable();
 
         if (l >= 2) {
           this.form.get('level2Filter')?.enable();
@@ -108,6 +133,12 @@ export class SouComponent {
         }
         if (l >= 4) {
           this.form.get('level4Filter')?.enable();
+        }
+        if (l >= 5) {
+          this.form.get('level5Filter')?.enable();
+        }
+        if (l >= 6) {
+          this.form.get('level6Filter')?.enable();
         }
       });
 
@@ -120,6 +151,8 @@ export class SouComponent {
           level4Unit: null,
           level3Filter: '',
           level4Filter: '',
+          level5Filter: '',
+          level6Filter: '',
         });
 
         if (unit) {
@@ -140,7 +173,6 @@ export class SouComponent {
       .valueChanges.subscribe((unit: OrganisationUnit | null) => {
         this.form.patchValue({
           level4Unit: null,
-
           level4Filter: '',
         });
 
@@ -153,6 +185,22 @@ export class SouComponent {
         } else {
           this.level4Units.set([]);
           this.level4FilteredUnits.set([]);
+        }
+      });
+
+    // Update Level 5 on level4 change
+    this.form
+      .get('level4Unit')!
+      .valueChanges.subscribe((unit: OrganisationUnit | null) => {
+        if (unit) {
+          const list = this.allUnits().filter(
+            (u) => u.level === 5 && u.parent?.id === unit.id
+          );
+          this.level5Units.set(list);
+          this.level5FilteredUnits.set(list);
+        } else {
+          this.level5Units.set([]);
+          this.level5FilteredUnits.set([]);
         }
       });
 
@@ -183,6 +231,24 @@ export class SouComponent {
 
         this.level4FilteredUnits.set(filtered);
       });
+
+    this.form
+      .get('level5Filter')!
+      .valueChanges.pipe(startWith(''))
+      .subscribe((txt) => {
+        const filtered = this._filter(txt, this.level5FilteredUnits());
+
+        this.level5FilteredUnits.set(filtered);
+      });
+
+    this.form
+      .get('level6Filter')!
+      .valueChanges.pipe(startWith(''))
+      .subscribe((txt) => {
+        const filtered = this._filter(txt, this.level6FilteredUnits());
+
+        this.level6FilteredUnits.set(filtered);
+      });
   }
   private _filter(
     name: string | null | OrganisationUnit,
@@ -200,13 +266,45 @@ export class SouComponent {
     }
   }
 
-  clearSelection(level: 'level2' | 'level3' | 'level4') {
+  clearSelection(level: 'level2' | 'level3' | 'level4' | 'level5' | 'level6') {
     this.form.get(`${level}Filter`)?.setValue('');
     this.form.get(`${level}Unit`)?.setValue(null);
+    // Reset the filtered options manually
+    switch (level) {
+      case 'level2':
+        this.level2FilteredUnits.set(this.level2Units());
+        this.level3Units.set([]);
+        this.level3FilteredUnits.set([]);
+        this.level4Units.set([]);
+        this.level4FilteredUnits.set([]);
+        break;
+      case 'level3':
+        this.level3FilteredUnits.set(this.level3Units());
+        this.level4Units.set([]);
+        this.level4FilteredUnits.set([]);
+        break;
+      case 'level4':
+        this.level4FilteredUnits.set(this.level4Units());
+        this.level5Units.set([]);
+        this.level5FilteredUnits.set([]);
+        break;
+      case 'level5':
+        this.level5FilteredUnits.set(this.level5Units());
+        this.level6Units.set([]);
+        this.level6FilteredUnits.set([]);
+        break;
+      case 'level6':
+        this.level6FilteredUnits.set(this.level6Units());
+        break;
+    }
   }
   onOptionSelected(option: OrganisationUnit, level: number) {
     if (level === 2) {
-      this.form.patchValue({ level3Filter: null, level4Filter: null });
+      this.form.patchValue({
+        level3Filter: null,
+        level4Filter: null,
+        level5Filter: null,
+      });
       if (option && this.form.get('level3Filter')?.enabled) {
         const units = this.allUnits();
         this.level3FilteredUnits.set(
@@ -216,7 +314,7 @@ export class SouComponent {
         this.level3FilteredUnits.set([]);
       }
     } else if (level === 3) {
-      this.form.patchValue({ level4Filter: null });
+      this.form.patchValue({ level4Filter: null, level5Filter: null });
       if (option && this.form.get('level4Filter')?.enabled) {
         const units = this.allUnits();
         this.level4FilteredUnits.set(
@@ -224,6 +322,26 @@ export class SouComponent {
         );
       } else {
         this.level4FilteredUnits.set([]);
+      }
+    } else if (level === 4) {
+      this.form.patchValue({ level5Filter: null });
+      if (option && this.form.get('level5Filter')?.enabled) {
+        const units = this.allUnits();
+        this.level5FilteredUnits.set(
+          units.filter((u) => u.level === 5 && u.parent?.id === option.id)
+        );
+      } else {
+        this.level5FilteredUnits.set([]);
+      }
+    } else if (level === 5) {
+      this.form.patchValue({ level6Filter: null });
+      if (option && this.form.get('level6Filter')?.enabled) {
+        const units = this.allUnits();
+        this.level6FilteredUnits.set(
+          units.filter((u) => u.level === 6 && u.parent?.id === option.id)
+        );
+      } else {
+        this.level6FilteredUnits.set([]);
       }
     }
   }

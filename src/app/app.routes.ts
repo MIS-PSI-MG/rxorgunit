@@ -11,4 +11,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./components/sou/sou.component').then((m) => m.SouComponent),
   },
+  {
+    path: 'nsou',
+    loadComponent: () =>
+      import('./components/nsou/nsou.component').then((m) => m.NsouComponent),
+  },
 ];

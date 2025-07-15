@@ -76,10 +76,61 @@
     <button mat-icon-button matSuffix (click)="clearSelection('level4')">
       <mat-icon>close</mat-icon></button
     >}
-    <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto4="matAutocomplete"
+      [displayWith]="displayFn"
+      (optionSelected)="onOptionSelected($event.option.value, 4)"
+    >
       @for (commune of level4FilteredUnits(); track commune.id) {
       <mat-option [value]="commune">
         {{ commune.name }}
+      </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+  <!-- Level 5 -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Level 5 (Formation sanitaire)</mat-label>
+    <input
+      type="text"
+      matInput
+      [matAutocomplete]="auto5"
+      formControlName="level5Filter"
+    />
+    @if(form.get('level5Filter')!.value) {
+    <button mat-icon-button matSuffix (click)="clearSelection('level5')">
+      <mat-icon>close</mat-icon></button
+    >}
+    <mat-autocomplete
+      #auto5="matAutocomplete"
+      [displayWith]="displayFn"
+      (optionSelected)="onOptionSelected($event.option.value, 5)"
+    >
+      @for (village of level5FilteredUnits(); track village.id) {
+      <mat-option [value]="village">
+        {{ village.name }}
+      </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <!-- Level 6 -->
+  <mat-form-field appearance="outline" class="w-full mb-4">
+    <mat-label>Level 6 (Fokontany)</mat-label>
+    <input
+      type="text"
+      matInput
+      [matAutocomplete]="auto6"
+      formControlName="level6Filter"
+    />
+    @if(form.get('level6Filter')!.value) {
+    <button mat-icon-button matSuffix (click)="clearSelection('level6')">
+      <mat-icon>close</mat-icon></button
+    >}
+    <mat-autocomplete #auto6="matAutocomplete" [displayWith]="displayFn">
+      @for (village of level6FilteredUnits(); track village.id) {
+      <mat-option [value]="village">
+        {{ village.name }}
       </mat-option>
       }
     </mat-autocomplete>
