@@ -10,9 +10,14 @@
 
   <mat-form-field appearance="outline" class="full-width">
     <mat-label>Region</mat-label>
-    <input matInput formControlName="level1" [matAutocomplete]="auto1" />
+    <input
+      matInput
+      formControlName="level1"
+      [matAutocomplete]="auto1"
+      (input)="filterLevel1Options($event)"
+    />
     <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayFn">
-      @for ( unit of level1Options(); track unit.id) {
+      @for ( unit of level1FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
     </mat-autocomplete>
@@ -43,6 +48,21 @@
     />
     <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
       @for ( unit of level3FilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Level 4 Unit</mat-label>
+    <input
+      matInput
+      formControlName="level4"
+      [matAutocomplete]="auto4"
+      (input)="filterLevel4Options($event)"
+    />
+    <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
+      @for ( unit of level4FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
     </mat-autocomplete>

@@ -20,4 +20,39 @@ export class OrganizationUnitService {
       (unit) => unit.level === level && unit.parent?.id === parentId
     );
   }
+  getCHRR(parentId: string) {
+    return this.organisationUnits().find(
+      (unit) =>
+        unit.level === 5 &&
+        unit.name.includes('CHRR') &&
+        unit.ancestors.some((a) => a.id === parentId)
+    );
+  }
+
+  getCSB(parentId: string) {
+    return this.organisationUnits().find(
+      (unit) =>
+        unit.level === 5 &&
+        unit.name.includes('CSB') &&
+        unit.ancestors.some((a) => a.id === parentId)
+    );
+  }
+
+  getCHRD(parentId: string) {
+    return this.organisationUnits().find(
+      (unit) =>
+        unit.level === 5 &&
+        unit.name.includes('CHRD') &&
+        unit.ancestors.some((a) => a.id === parentId)
+    );
+  }
+
+  getFSP(parentId: string) {
+    return this.organisationUnits().find(
+      (unit) =>
+        unit.level === 5 &&
+        unit.name.includes('FSP') &&
+        unit.ancestors.some((a) => a.id === parentId)
+    );
+  }
 }

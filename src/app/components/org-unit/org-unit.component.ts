@@ -39,6 +39,8 @@ export class OrgUnitComponent implements OnInit {
     level1: [{ value: null as OrganisationUnit | null, disabled: true }],
     level2: [{ value: null as OrganisationUnit | null, disabled: true }],
     level3: [{ value: null as OrganisationUnit | null, disabled: true }],
+    level4: [{ value: null as OrganisationUnit | null, disabled: true }],
+    level5: [{ value: null as OrganisationUnit | null, disabled: true }],
   });
 
   // Signals for options arrays
@@ -46,8 +48,13 @@ export class OrgUnitComponent implements OnInit {
   level1Options = signal<OrganisationUnit[]>([]);
   level2Options = signal<OrganisationUnit[]>([]);
   level3Options = signal<OrganisationUnit[]>([]);
+  level4Options = signal<OrganisationUnit[]>([]);
+  CHRROptions = signal<OrganisationUnit[]>([]);
+
+  level1FilteredOptions = signal<OrganisationUnit[]>([]);
   level2FilteredOptions = signal<OrganisationUnit[]>([]);
   level3FilteredOptions = signal<OrganisationUnit[]>([]);
+  level4FilteredOptions = signal<OrganisationUnit[]>([]);
 
   constructor() {
     const level$ = this.form
@@ -59,6 +66,12 @@ export class OrgUnitComponent implements OnInit {
     const level2$ = this.form
       .get('level2')!
       .valueChanges.pipe(startWith(this.form.get('level2')!.value));
+    const level3$ = this.form
+      .get('level3')!
+      .valueChanges.pipe(startWith(this.form.get('level3')!.value));
+    const level4$ = this.form
+      .get('level4')!
+      .valueChanges.pipe(startWith(this.form.get('level4')!.value));
 
     // Control enabling/disabling inputs based on level selected
     level$.subscribe((level) => {
@@ -67,28 +80,35 @@ export class OrgUnitComponent implements OnInit {
     });
 
     // Update options reactively when level, level1, or level2 change
-    combineLatest([level$, level1$, level2$])
+    combineLatest([level$, level1$, level2$, level3$, level4$])
       .pipe(
-        map(([level, l1, l2]) => {
+        map(([level, l1, l2, l3, l4]) => {
           const lvl = level?.level ?? 0;
           console.log('Selected Level:', lvl);
           const opts1 = lvl >= 2 ? this.orgService.getUnitsByLevel(2) : [];
+          const CHRROpts =
+            lvl >= 1 ? this.orgService.getCHRR(l1?.id ?? '') : [];
           const opts2 =
             lvl >= 3 && l1 ? this.orgService.getChildren(3, l1.id) : [];
           const opts3 =
             lvl >= 4 && l2 ? this.orgService.getChildren(4, l2.id) : [];
+          const opts4 =
+            lvl >= 5 && l3 ? this.orgService.getChildren(5, l3.id) : [];
           // Return the options for each level
-          return { opts1, opts2, opts3 };
+          return { opts1, opts2, opts3, opts4, CHRROpts };
         })
       )
-      .subscribe(({ opts1, opts2, opts3 }) => {
+      .subscribe(({ opts1, opts2, opts3, opts4, CHRROpts }) => {
         console.log('Options for Level 1:', opts1.length);
+        console.log(CHRROpts);
         this.level1Options.set(opts1);
         this.level2Options.set(opts2);
-
         this.level3Options.set(opts3);
+        this.level4Options.set(opts4);
+        this.level1FilteredOptions.set(opts1);
         this.level2FilteredOptions.set(opts2);
         this.level3FilteredOptions.set(opts3);
+        this.level4FilteredOptions.set(opts4);
       });
   }
 
@@ -102,17 +122,15 @@ export class OrgUnitComponent implements OnInit {
   }
 
   private updateFormState(level: number) {
-    this.form.get('level1')?.reset();
-    this.form.get('level2')?.reset();
-    this.form.get('level3')?.reset();
-
-    this.form.get('level1')?.disable();
-    this.form.get('level2')?.disable();
-    this.form.get('level3')?.disable();
+    for (let i = 1; i <= 5; i++) {
+      this.form.get(`level${i}`)?.disable();
+      this.form.get(`level${i}`)?.reset();
+    }
 
     if (level >= 2) this.form.get('level1')?.enable();
     if (level >= 3) this.form.get('level2')?.enable();
     if (level >= 4) this.form.get('level3')?.enable();
+    if (level >= 5) this.form.get('level4')?.enable();
   }
 
   private updateLevel2Reset() {
@@ -122,14 +140,23 @@ export class OrgUnitComponent implements OnInit {
   displayFn = (unit: OrganisationUnit) => unit?.name ?? '';
   // compareFn = (a: OrganisationUnit, b: OrganisationUnit) => a?.id === b?.id;
 
+  filterLevel1Options(inputValue: Event) {
+    const target = inputValue.target as HTMLInputElement | null;
+    const inpValue = target?.value ?? '';
+    if (inpValue) {
+      const options = this.level1Options();
+      const filtered = this.filter(target, options);
+      this.level1FilteredOptions.set(filtered);
+    } else {
+      this.level1FilteredOptions.set(this.level1Options());
+    }
+  }
   filterLevel2Options(inputValue: Event) {
     const target = inputValue.target as HTMLInputElement | null;
     const inpValue = target?.value ?? '';
     if (inpValue) {
       const options = this.level2Options();
-      const filtered = options.filter((opt) =>
-        opt.name.toLowerCase().includes(inpValue.toLowerCase())
-      );
+      const filtered = this.filter(target, options);
       this.level2FilteredOptions.set(filtered);
     }
   }
@@ -137,11 +164,21 @@ export class OrgUnitComponent implements OnInit {
   filterLevel3Options(inputValue: Event) {
     const options = this.level3Options();
     const target = inputValue.target as HTMLInputElement | null;
+    const filtered = this.filter(target, options);
+    this.level3FilteredOptions.set(filtered);
+  }
+  filterLevel4Options(inputValue: Event) {
+    const options = this.level4Options();
+    const target = inputValue.target as HTMLInputElement | null;
+    const filtered = this.filter(target, options);
+    this.level4FilteredOptions.set(filtered);
+  }
+
+  private filter(target: HTMLInputElement | null, options: OrganisationUnit[]) {
     const value = target?.value ?? '';
-    const filtered = options.filter((opt) =>
+    return options.filter((opt) =>
       opt.name.toLowerCase().includes(value.toLowerCase())
     );
-    this.level3FilteredOptions.set(filtered);
   }
 
   onSubmit() {
