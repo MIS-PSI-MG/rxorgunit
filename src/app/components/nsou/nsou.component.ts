@@ -1,195 +1,146 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
+import { FormGroup, FormControl } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import {
+  switchMap,
+  startWith,
+  tap,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  shareReplay,
+  filter,
+} from 'rxjs/operators';
+import { OrganisationUnitLevel } from '../../models/organisationUnitLevel.interface';
+import { OrganisationUnit } from '../../models/organisationUnit.interface';
+import { OuExtService as OrgUnitService } from '../../services/ou-ext.service';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { OrganisationUnit } from '../../models/organisationUnit.interface';
-import { OrganisationUnitLevel } from '../../models/organisationUnitLevel.interface';
-import { OuExtService as OrgUnitService } from '../../services/ou-ext.service';
-import { startWith, switchMap, map, combineLatest } from 'rxjs';
-import { Observable, of } from 'rxjs';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { AsyncPipe } from '@angular/common';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { AsyncPipe, CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-nsou',
   imports: [
     ReactiveFormsModule,
-    MatAutocompleteModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatOptionModule,
-    MatIconModule,
-    MatButtonModule,
+    MatAutocompleteModule,
     AsyncPipe,
+    CommonModule,
+    MatSelectModule,
   ],
   templateUrl: './nsou.component.html',
   styleUrl: './nsou.component.css',
 })
-export class NsouComponent {
-  private fb = inject(FormBuilder);
-  private orgService = new OrgUnitService();
+export class NsouComponent implements OnInit {
+  private svc = inject(OrgUnitService);
 
-  form: FormGroup;
-  levels$: Observable<OrganisationUnitLevel[]>;
-  allUnits$: Observable<OrganisationUnit[]>;
+  /** Form for selecting organisation units */
+  form = new FormGroup({
+    level: new FormControl<OrganisationUnitLevel | null>(null),
+    ou1: new FormControl<OrganisationUnit | null>({
+      value: null,
+      disabled: true,
+    }),
+    ou2: new FormControl<OrganisationUnit | null>({
+      value: null,
+      disabled: true,
+    }),
+    ou3: new FormControl<OrganisationUnit | null>({
+      value: null,
+      disabled: true,
+    }),
+  });
 
-  level2Units$: Observable<OrganisationUnit[]>;
-  level3Units$: Observable<OrganisationUnit[]>;
-  level4Units$: Observable<OrganisationUnit[]>;
+  levels$ = this.svc.loadLevels();
+  unitsAll$ = this.svc.loadUnits();
 
-  level2FilteredUnits$: Observable<OrganisationUnit[]>;
-  level3FilteredUnits$: Observable<OrganisationUnit[]>;
-  level4FilteredUnits$: Observable<OrganisationUnit[]>;
+  filtered1$!: Observable<OrganisationUnit[]>;
+  filtered2$!: Observable<OrganisationUnit[]>;
+  filtered3$!: Observable<OrganisationUnit[]>;
 
-  displayFn = (unit?: OrganisationUnit): string => (unit ? unit.name : '');
+  ngOnInit() {
+    this.form.controls.level.valueChanges.subscribe((lvl) => {
+      this.form.controls.ou1.reset();
+      this.form.controls.ou1.enable();
 
-  constructor() {
-    this.form = this.fb.group({
-      level: [null],
-      level2Unit: [{ value: null, disabled: true }],
-      level3Unit: [{ value: null, disabled: true }],
-      level4Unit: [{ value: null, disabled: true }],
-      level2Filter: [{ value: '', disabled: true }],
-      level3Filter: [{ value: '', disabled: true }],
-      level4Filter: [{ value: '', disabled: true }],
+      this.form.controls.ou2.reset();
+      this.form.controls.ou2.disable();
+      this.form.controls.ou3.reset();
+      this.form.controls.ou3.disable();
     });
 
-    this.levels$ = this.orgService.getOrganisationUnitLevels();
-    this.allUnits$ = this.orgService.getOrganisationUnits();
-
-    this.level2Units$ = this.allUnits$.pipe(
-      map((units) => units.filter((u) => u.level === 2))
-    );
-
-    this.level3Units$ = this.form.get('level2Unit')!.valueChanges.pipe(
-      startWith(null),
-      switchMap((level2Unit) => {
-        if (level2Unit) {
-          return this.allUnits$.pipe(
-            map((units) =>
-              units.filter(
-                (u) => u.level === 3 && u.parent?.id === level2Unit.id
-              )
-            )
-          );
-        }
-        return of([]);
-      })
-    );
-
-    this.level4Units$ = this.form.get('level3Unit')!.valueChanges.pipe(
-      startWith(null),
-      switchMap((level3Unit) => {
-        if (level3Unit) {
-          return this.allUnits$.pipe(
-            map((units) =>
-              units.filter(
-                (u) => u.level === 4 && u.parent?.id === level3Unit.id
-              )
-            )
-          );
-        }
-        return of([]);
-      })
-    );
-
-    this.level2FilteredUnits$ = combineLatest([
-      this.form.get('level2Filter')!.valueChanges.pipe(startWith('')),
-      this.level2Units$,
-    ]).pipe(map(([filter, units]) => this._filter(filter, units)));
-
-    this.level3FilteredUnits$ = combineLatest([
-      this.form.get('level3Filter')!.valueChanges.pipe(startWith('')),
-      this.level3Units$,
-    ]).pipe(map(([filter, units]) => this._filter(filter, units)));
-
-    this.level4FilteredUnits$ = combineLatest([
-      this.form.get('level4Filter')!.valueChanges.pipe(startWith('')),
-      this.level4Units$,
-    ]).pipe(map(([filter, units]) => this._filter(filter, units)));
-  }
-
-  ngOnInit(): void {
-    this.form.get('level')!.valueChanges.subscribe((lvl) => {
-      const l = lvl?.level ?? 0;
-      this.form.patchValue({
-        level2Unit: null,
-        level3Unit: null,
-        level4Unit: null,
-        level2Filter: '',
-        level3Filter: '',
-        level4Filter: '',
-      });
-
-      this.form.get('level2Filter')?.disable();
-      this.form.get('level3Filter')?.disable();
-      this.form.get('level4Filter')?.disable();
-
-      if (l >= 2) {
-        this.form.get('level2Filter')?.enable();
-      }
-      if (l >= 3) {
-        this.form.get('level3Filter')?.enable();
-      }
-      if (l >= 4) {
-        this.form.get('level4Filter')?.enable();
+    this.form.controls.ou1.valueChanges.subscribe((parent) => {
+      if (parent) {
+        this.form.controls.ou2.enable();
+      } else {
+        this.form.controls.ou2.disable();
+        this.form.controls.ou3.disable();
       }
     });
 
-    this.form.get('level2Unit')!.valueChanges.subscribe(() => {
-      this.form.patchValue({
-        level3Unit: null,
-        level4Unit: null,
-        level3Filter: '',
-        level4Filter: '',
-      });
-    });
-
-    this.form.get('level3Unit')!.valueChanges.subscribe(() => {
-      this.form.patchValue({
-        level4Unit: null,
-        level4Filter: '',
-      });
+    this.form.controls.ou2.valueChanges.subscribe((parent) => {
+      if (parent) {
+        this.form.controls.ou3.enable();
+      } else {
+        this.form.controls.ou3.disable();
+      }
     });
   }
 
-  onLevel2Selected(event: MatAutocompleteSelectedEvent) {
-    const unit = event.option.value as OrganisationUnit;
-    this.form.get('level2Unit')!.setValue(unit);
-    this.form.get('level2Filter')!.setValue(unit.name);
+  private filterUnits(
+    input: OrganisationUnit | string,
+    level: number,
+    parentId: string | null
+  ): Observable<OrganisationUnit[]> {
+    const text =
+      typeof input === 'string' ? input : input?.name || input?.shortName || '';
+    const filterText = text.toLowerCase().trim();
+
+    return this.unitsAll$.pipe(
+      map((list) =>
+        list.filter(
+          (ou) =>
+            ou.level === level &&
+            (!parentId || ou.parent?.id === parentId) &&
+            (ou.name.toLowerCase().includes(filterText) ||
+              ou.shortName.toLowerCase().includes(filterText))
+        )
+      )
+    );
   }
 
-  onLevel3Selected(event: MatAutocompleteSelectedEvent) {
-    const unit = event.option.value as OrganisationUnit;
-    this.form.get('level3Unit')!.setValue(unit);
-    this.form.get('level3Filter')!.setValue(unit.name);
+  private resetAll() {
+    ['ou1', 'ou2', 'ou3'].forEach((c) => {
+      const key = c as keyof typeof this.form.controls;
+      this.form.controls[key].reset();
+      this.form.controls[key].disable();
+    });
+    const lvl = this.form.controls.level.value;
+    if (lvl) this.enable('ou1');
   }
 
-  onLevel4Selected(event: MatAutocompleteSelectedEvent) {
-    const unit = event.option.value as OrganisationUnit;
-    this.form.get('level4Unit')!.setValue(unit);
-    this.form.get('level4Filter')!.setValue(unit.name);
+  private resetControl(...ctrls: Array<'ou1' | 'ou2' | 'ou3'>) {
+    ctrls.forEach((c) => {
+      this.form.controls[c].reset();
+      this.form.controls[c].disable();
+    });
   }
 
-  private _filter(
-    filter: string,
-    list: OrganisationUnit[]
-  ): OrganisationUnit[] {
-    if (filter) {
-      return list.filter((u) =>
-        u.name.toLowerCase().includes(filter.toLowerCase())
-      );
-    }
-    return list;
+  private enable(ctrl: 'ou1' | 'ou2' | 'ou3') {
+    this.form.controls[ctrl].enable();
   }
 
-  clearSelection(level: 'level2' | 'level3' | 'level4') {
-    this.form.get(`${level}Filter`)?.setValue('');
-    this.form.get(`${level}Unit`)?.setValue(null);
+  displayOU(ou: OrganisationUnit | string): string {
+    return typeof ou === 'string' ? ou : ou?.name || '';
+  }
+
+  displayLevel(lvl: OrganisationUnitLevel | null) {
+    return lvl ? `${lvl.name} (L${lvl.level})` : '';
   }
 }
