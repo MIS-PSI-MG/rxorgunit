@@ -41,6 +41,7 @@ export class OrgUnitComponent implements OnInit {
     level3: [{ value: null as OrganisationUnit | null, disabled: true }],
     level4: [{ value: null as OrganisationUnit | null, disabled: true }],
     level5: [{ value: null as OrganisationUnit | null, disabled: true }],
+    CHRR: [{ value: null as OrganisationUnit | null, disabled: true }],
   });
 
   // Signals for options arrays
@@ -55,6 +56,7 @@ export class OrgUnitComponent implements OnInit {
   level2FilteredOptions = signal<OrganisationUnit[]>([]);
   level3FilteredOptions = signal<OrganisationUnit[]>([]);
   level4FilteredOptions = signal<OrganisationUnit[]>([]);
+  CHRRFilteredOptions = signal<OrganisationUnit[]>([]);
 
   constructor() {
     const level$ = this.form
@@ -72,6 +74,9 @@ export class OrgUnitComponent implements OnInit {
     const level4$ = this.form
       .get('level4')!
       .valueChanges.pipe(startWith(this.form.get('level4')!.value));
+    const CHRR$ = this.form
+      .get('CHRR')!
+      .valueChanges.pipe(startWith(this.form.get('CHRR')!.value));
 
     // Control enabling/disabling inputs based on level selected
     level$.subscribe((level) => {
@@ -80,35 +85,44 @@ export class OrgUnitComponent implements OnInit {
     });
 
     // Update options reactively when level, level1, or level2 change
-    combineLatest([level$, level1$, level2$, level3$, level4$])
+    combineLatest([level$, level1$, level2$, level3$, level4$, CHRR$])
       .pipe(
-        map(([level, l1, l2, l3, l4]) => {
+        map(([level, l1, l2, l3, l4, CHRR]) => {
           const lvl = level?.level ?? 0;
-          console.log('Selected Level:', lvl);
           const opts1 = lvl >= 2 ? this.orgService.getUnitsByLevel(2) : [];
-          const CHRROpts =
-            lvl >= 1 ? this.orgService.getCHRR(l1?.id ?? '') : [];
           const opts2 =
             lvl >= 3 && l1 ? this.orgService.getChildren(3, l1.id) : [];
           const opts3 =
             lvl >= 4 && l2 ? this.orgService.getChildren(4, l2.id) : [];
           const opts4 =
             lvl >= 5 && l3 ? this.orgService.getChildren(5, l3.id) : [];
+          const CHRROpts =
+            lvl >= 21 && l1 ? this.orgService.getCHRR(l1.id) : [];
+
           // Return the options for each level
           return { opts1, opts2, opts3, opts4, CHRROpts };
         })
       )
       .subscribe(({ opts1, opts2, opts3, opts4, CHRROpts }) => {
-        console.log('Options for Level 1:', opts1.length);
-        console.log(CHRROpts);
         this.level1Options.set(opts1);
         this.level2Options.set(opts2);
         this.level3Options.set(opts3);
         this.level4Options.set(opts4);
+
+        this.CHRROptions.set(
+          Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+        );
+
         this.level1FilteredOptions.set(opts1);
         this.level2FilteredOptions.set(opts2);
         this.level3FilteredOptions.set(opts3);
         this.level4FilteredOptions.set(opts4);
+        this.CHRRFilteredOptions.set(
+          Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+        );
+
+        // console.log(this.CHRROptions(), 'CHRR Options');
+        // console.log(this.CHRRFilteredOptions(), 'CHRR Filtered Options');
       });
   }
 
@@ -126,11 +140,20 @@ export class OrgUnitComponent implements OnInit {
       this.form.get(`level${i}`)?.disable();
       this.form.get(`level${i}`)?.reset();
     }
+    this.form.get('CHRR')?.disable();
+    this.form.get('CHRR')?.reset();
 
     if (level >= 2) this.form.get('level1')?.enable();
     if (level >= 3) this.form.get('level2')?.enable();
     if (level >= 4) this.form.get('level3')?.enable();
     if (level >= 5) this.form.get('level4')?.enable();
+    if (level >= 21) {
+      this.form.get('level1')?.enable();
+      this.form.get('CHRR')?.enable();
+      for (let i = 2; i <= 5; i++) {
+        this.form.get(`level${i}`)?.disable();
+      }
+    }
   }
 
   private updateLevel2Reset() {
@@ -172,6 +195,13 @@ export class OrgUnitComponent implements OnInit {
     const target = inputValue.target as HTMLInputElement | null;
     const filtered = this.filter(target, options);
     this.level4FilteredOptions.set(filtered);
+  }
+
+  filterCHRROptions(inputValue: Event) {
+    const options = this.CHRROptions();
+    const target = inputValue.target as HTMLInputElement | null;
+    const filtered = this.filter(target, options);
+    this.CHRRFilteredOptions.set(filtered);
   }
 
   private filter(target: HTMLInputElement | null, options: OrganisationUnit[]) {

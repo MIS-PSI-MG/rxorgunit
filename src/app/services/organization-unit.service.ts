@@ -55,4 +55,12 @@ export class OrganizationUnitService {
         unit.ancestors.some((a) => a.id === parentId)
     );
   }
+  getCHU(parentId: string) {
+    return this.organisationUnits().find(
+      (unit) =>
+        unit.level === 5 &&
+        unit.name.includes('CHU') &&
+        unit.ancestors.some((a) => a.id === parentId)
+    );
+  }
 }

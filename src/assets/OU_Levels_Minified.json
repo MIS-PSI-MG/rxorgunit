@@ -1,34 +1,40 @@
 {
-    "organisationUnitLevels": [
-        {
-            "displayName": "Région",
-            "id": "ykodY17jouw",
-            "level": 2,
-            "name": "Région"
-        },
-        {
-            "displayName": "District",
-            "id": "sSDIBMoRBPf",
-            "level": 3,
-            "name": "District"
-        },
-        {
-            "displayName": "Commune",
-            "id": "bumGiBvgFvn",
-            "level": 4,
-            "name": "Commune"
-        },
-        {
-            "displayName": "Formations Sanitaires",
-            "id": "NzA6IhTIq2L",
-            "level": 5,
-            "name": "Formations Sanitaires"
-        },
-        {
-            "displayName": "Fokontany",
-            "id": "Kp92P7E3ekq",
-            "level": 6,
-            "name": "Fokontany"
-        }
-    ]
+  "organisationUnitLevels": [
+    {
+      "displayName": "Région",
+      "id": "ykodY17jouw",
+      "level": 2,
+      "name": "Région"
+    },
+    {
+      "displayName": "CHRR",
+      "id": "ykodY17jouw0",
+      "level": 21,
+      "name": "CHRR"
+    },
+    {
+      "displayName": "District",
+      "id": "sSDIBMoRBPf",
+      "level": 3,
+      "name": "District"
+    },
+    {
+      "displayName": "Commune",
+      "id": "bumGiBvgFvn",
+      "level": 4,
+      "name": "Commune"
+    },
+    {
+      "displayName": "Formations Sanitaires",
+      "id": "NzA6IhTIq2L",
+      "level": 5,
+      "name": "Formations Sanitaires"
+    },
+    {
+      "displayName": "Fokontany",
+      "id": "Kp92P7E3ekq",
+      "level": 6,
+      "name": "Fokontany"
+    }
+  ]
 }

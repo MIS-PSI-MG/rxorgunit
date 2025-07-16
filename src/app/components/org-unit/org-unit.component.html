@@ -24,6 +24,21 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CHRR</mat-label>
+    <input
+      matInput
+      formControlName="CHRR"
+      [matAutocomplete]="auto21"
+      (input)="filterCHRROptions($event)"
+    />
+    <mat-autocomplete #auto21="matAutocomplete" [displayWith]="displayFn">
+      @for ( unit of CHRRFilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
     <mat-label>District</mat-label>
     <input
       matInput
@@ -39,7 +54,7 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Level 3 Unit</mat-label>
+    <mat-label>Commune</mat-label>
     <input
       matInput
       formControlName="level3"
@@ -54,7 +69,7 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Level 4 Unit</mat-label>
+    <mat-label>Formation sanitaire</mat-label>
     <input
       matInput
       formControlName="level4"
