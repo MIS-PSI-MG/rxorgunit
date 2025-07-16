@@ -1,138 +1,40 @@
-<form [formGroup]="form" class="p-4">
-  <!-- Level Selector -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Select Level</mat-label>
+<form [formGroup]="form">
+  <mat-form-field>
+    <mat-label>Level</mat-label>
     <mat-select formControlName="level">
-      @for (lvl of levels(); track lvl.id) {
-      <mat-option [value]="lvl">
-        {{ lvl.name }}
+      <mat-option *ngFor="let lvl of levels$ | async" [value]="lvl">
+        {{ lvl.name }} (L{{ lvl.level }})
       </mat-option>
-      }
     </mat-select>
   </mat-form-field>
 
-  <!-- Level 2 -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Level 2 (Region)</mat-label>
-    <input
-      type="text"
-      matInput
-      [matAutocomplete]="auto2"
-      formControlName="level2Filter"
-    />
-    @if(form.get('level2Filter')!.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level2')">
-      <mat-icon>close</mat-icon></button
-    >}
-    <mat-autocomplete
-      #auto2="matAutocomplete"
-      [displayWith]="displayFn"
-      (optionSelected)="onOptionSelected($event.option.value, 2)"
-    >
-      @for (region of level2FilteredUnits(); track region.id) {
-      <mat-option [value]="region">
-        {{ region.name }}
-      </mat-option>
-      }
+  <mat-form-field>
+    <mat-label>Level 2</mat-label>
+    <input matInput formControlName="level2Filter" [matAutocomplete]="auto2" />
+    <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let ou of filtered2$ | async" [value]="ou">{{
+        ou.name
+      }}</mat-option>
     </mat-autocomplete>
   </mat-form-field>
 
-  <!-- Level 3 -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Level 3 (District)</mat-label>
-    <input
-      type="text"
-      matInput
-      [matAutocomplete]="auto3"
-      formControlName="level3Filter"
-    />
-    @if(form.get('level3Filter')!.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level3')">
-      <mat-icon>close</mat-icon></button
-    >}
-    <mat-autocomplete
-      #auto3="matAutocomplete"
-      [displayWith]="displayFn"
-      (optionSelected)="onOptionSelected($event.option.value, 3)"
-    >
-      @for (district of level3FilteredUnits(); track district.id) {
-      <mat-option [value]="district">
-        {{ district.name }}
-      </mat-option>
-      }
+  <mat-form-field>
+    <mat-label>Level 3</mat-label>
+    <input matInput formControlName="level3Filter" [matAutocomplete]="auto3" />
+    <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let ou of filtered3$ | async" [value]="ou">{{
+        ou.name
+      }}</mat-option>
     </mat-autocomplete>
   </mat-form-field>
 
-  <!-- Level 4 -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Level 4 (Commune)</mat-label>
-    <input
-      type="text"
-      matInput
-      [matAutocomplete]="auto4"
-      formControlName="level4Filter"
-    />
-    @if(form.get('level4Filter')!.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level4')">
-      <mat-icon>close</mat-icon></button
-    >}
-    <mat-autocomplete
-      #auto4="matAutocomplete"
-      [displayWith]="displayFn"
-      (optionSelected)="onOptionSelected($event.option.value, 4)"
-    >
-      @for (commune of level4FilteredUnits(); track commune.id) {
-      <mat-option [value]="commune">
-        {{ commune.name }}
-      </mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
-  <!-- Level 5 -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Level 5 (Formation sanitaire)</mat-label>
-    <input
-      type="text"
-      matInput
-      [matAutocomplete]="auto5"
-      formControlName="level5Filter"
-    />
-    @if(form.get('level5Filter')!.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level5')">
-      <mat-icon>close</mat-icon></button
-    >}
-    <mat-autocomplete
-      #auto5="matAutocomplete"
-      [displayWith]="displayFn"
-      (optionSelected)="onOptionSelected($event.option.value, 5)"
-    >
-      @for (village of level5FilteredUnits(); track village.id) {
-      <mat-option [value]="village">
-        {{ village.name }}
-      </mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
-
-  <!-- Level 6 -->
-  <mat-form-field appearance="outline" class="w-full mb-4">
-    <mat-label>Level 6 (Fokontany)</mat-label>
-    <input
-      type="text"
-      matInput
-      [matAutocomplete]="auto6"
-      formControlName="level6Filter"
-    />
-    @if(form.get('level6Filter')!.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level6')">
-      <mat-icon>close</mat-icon></button
-    >}
-    <mat-autocomplete #auto6="matAutocomplete" [displayWith]="displayFn">
-      @for (village of level6FilteredUnits(); track village.id) {
-      <mat-option [value]="village">
-        {{ village.name }}
-      </mat-option>
-      }
+  <mat-form-field>
+    <mat-label>Level 4</mat-label>
+    <input matInput formControlName="level4Filter" [matAutocomplete]="auto4" />
+    <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let ou of filtered4$ | async" [value]="ou">{{
+        ou.name
+      }}</mat-option>
     </mat-autocomplete>
   </mat-form-field>
 </form>

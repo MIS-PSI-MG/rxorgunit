@@ -1,87 +1,68 @@
-<form action="" [formGroup]="form">
-  <mat-form-field>
-    <mat-label>Level</mat-label>
+<form [formGroup]="form">
+  <!-- 🔢 Level selector -->
+  <mat-form-field appearance="fill">
+    <mat-label>Select Level</mat-label>
     <mat-select formControlName="level">
-      @for(level of levels$ | async; track level.id) {
-      <mat-option [value]="level">
-        {{ level.name }}
+      <mat-option *ngFor="let lvl of levels$ | async" [value]="lvl">
+        {{ lvl.name }} (L{{ lvl.level }})
       </mat-option>
-      }
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Level 2</mat-label>
+  <!-- ✅ Level 2 autocomplete -->
+  <mat-form-field appearance="fill">
+    <mat-label>Level 2 Organisation Unit</mat-label>
     <input
       matInput
-      formControlName="level2Filter"
-      [matAutocomplete]="autoLevel2"
+      formControlName="ou1"
+      [matAutocomplete]="auto2"
+      placeholder="Type to filter level 2"
     />
     <mat-autocomplete
-      #autoLevel2="matAutocomplete"
-      (optionSelected)="onLevel2Selected($event)"
+      #auto2="matAutocomplete"
+      [displayWith]="displayOU.bind(this)"
     >
-      @for( unit of level2FilteredUnits$ | async; track unit.id) {
-      <mat-option [value]="unit">
-        {{ unit.name }}
+      <mat-option *ngFor="let ou of filtered1$ | async" [value]="ou">
+        {{ ou.name }} — {{ ou.shortName }}
       </mat-option>
-      }
     </mat-autocomplete>
-    @if(form.get('level2Unit')?.value) {<button
-      mat-icon-button
-      matSuffix
-      (click)="clearSelection('level2')"
-    >
-      <mat-icon>clear</mat-icon></button
-    >}
   </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Level 3</mat-label>
+  <!-- 🔼 Level 3 autocomplete -->
+  <mat-form-field appearance="fill">
+    <mat-label>Level 3 Organisation Unit</mat-label>
     <input
       matInput
-      formControlName="level3Filter"
-      [matAutocomplete]="autoLevel3"
+      formControlName="ou2"
+      [matAutocomplete]="auto3"
+      placeholder="Type to filter level 3"
     />
     <mat-autocomplete
-      #autoLevel3="matAutocomplete"
-      (optionSelected)="onLevel3Selected($event)"
+      #auto3="matAutocomplete"
+      [displayWith]="displayOU.bind(this)"
     >
-      @for( unit of level3FilteredUnits$ | async; track unit.id) {
-      <mat-option [value]="unit">
-        {{ unit.name }}
+      <mat-option *ngFor="let ou of filtered2$ | async" [value]="ou">
+        {{ ou.name }} — {{ ou.shortName }}
       </mat-option>
-      }
     </mat-autocomplete>
-    @if(form.get('level3Unit')?.value) {
-    <button mat-icon-button matSuffix (click)="clearSelection('level3')">
-      <mat-icon>clear</mat-icon></button
-    >}
   </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Level 4</mat-label>
+  <!-- 🔽 Level 4 autocomplete -->
+  <mat-form-field appearance="fill">
+    <mat-label>Level 4 Organisation Unit</mat-label>
     <input
       matInput
-      formControlName="level4Filter"
-      [matAutocomplete]="autoLevel4"
+      formControlName="ou3"
+      [matAutocomplete]="auto4"
+      placeholder="Type to filter level 4"
     />
     <mat-autocomplete
-      #autoLevel4="matAutocomplete"
-      (optionSelected)="onLevel4Selected($event)"
+      #auto4="matAutocomplete"
+      [displayWith]="displayOU.bind(this)"
     >
-      @for(unit of level4FilteredUnits$ | async; track unit.id) {
-      <mat-option [value]="unit">
-        {{ unit.name }}
+      <mat-option *ngFor="let ou of filtered3$ | async" [value]="ou">
+        {{ ou.name }} — {{ ou.shortName }}
       </mat-option>
-      }
     </mat-autocomplete>
-    @if(form.get('level4Unit')?.value){<button
-      mat-icon-button
-      matSuffix
-      (click)="clearSelection('level4')"
-    >
-      <mat-icon>clear</mat-icon></button
-    >}
   </mat-form-field>
 </form>
