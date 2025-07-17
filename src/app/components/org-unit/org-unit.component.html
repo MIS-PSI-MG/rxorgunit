@@ -16,7 +16,11 @@
       [matAutocomplete]="auto1"
       (input)="filterLevel1Options($event)"
     />
-    <mat-autocomplete #auto1="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto1="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
       @for ( unit of level1FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
@@ -31,7 +35,11 @@
       [matAutocomplete]="auto21"
       (input)="filterCHRROptions($event)"
     />
-    <mat-autocomplete #auto21="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto21="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
       @for ( unit of CHRRFilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
@@ -46,7 +54,11 @@
       [matAutocomplete]="auto2"
       (input)="filterLevel2Options($event)"
     />
-    <mat-autocomplete #auto2="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto2="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
       @for ( unit of level2FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
@@ -61,7 +73,11 @@
       [matAutocomplete]="auto3"
       (input)="filterLevel3Options($event)"
     />
-    <mat-autocomplete #auto3="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto3="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
       @for ( unit of level3FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
@@ -76,7 +92,11 @@
       [matAutocomplete]="auto4"
       (input)="filterLevel4Options($event)"
     />
-    <mat-autocomplete #auto4="matAutocomplete" [displayWith]="displayFn">
+    <mat-autocomplete
+      #auto4="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
       @for ( unit of level4FilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }

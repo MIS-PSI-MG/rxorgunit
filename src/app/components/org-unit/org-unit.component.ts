@@ -42,6 +42,10 @@ export class OrgUnitComponent implements OnInit {
     level4: [{ value: null as OrganisationUnit | null, disabled: true }],
     level5: [{ value: null as OrganisationUnit | null, disabled: true }],
     CHRR: [{ value: null as OrganisationUnit | null, disabled: true }],
+    CHU: [{ value: null as OrganisationUnit | null, disabled: true }],
+    CHRD: [{ value: null as OrganisationUnit | null, disabled: true }],
+    FSP: [{ value: null as OrganisationUnit | null, disabled: true }],
+    CSB: [{ value: null as OrganisationUnit | null, disabled: true }],
   });
 
   // Signals for options arrays
@@ -51,19 +55,20 @@ export class OrgUnitComponent implements OnInit {
   level3Options = signal<OrganisationUnit[]>([]);
   level4Options = signal<OrganisationUnit[]>([]);
   CHRROptions = signal<OrganisationUnit[]>([]);
+  CHUOptions = signal<OrganisationUnit[]>([]);
+  CHRDOptions = signal<OrganisationUnit[]>([]);
+  FSPOptions = signal<OrganisationUnit[]>([]);
+  CSBOptions = signal<OrganisationUnit[]>([]);
 
   level1FilteredOptions = signal<OrganisationUnit[]>([]);
   level2FilteredOptions = signal<OrganisationUnit[]>([]);
   level3FilteredOptions = signal<OrganisationUnit[]>([]);
   level4FilteredOptions = signal<OrganisationUnit[]>([]);
   CHRRFilteredOptions = signal<OrganisationUnit[]>([]);
-
-  private prevLevel: any = null;
-  private prevL1: any = null;
-  private prevL2: any = null;
-  private prevL3: any = null;
-  private prevL4: any = null;
-  private prevCHRR: any = null;
+  CHUFilteredOptions = signal<OrganisationUnit[]>([]);
+  CHRDFilteredOptions = signal<OrganisationUnit[]>([]);
+  FSPFilteredOptions = signal<OrganisationUnit[]>([]);
+  CSBFilteredOptions = signal<OrganisationUnit[]>([]);
 
   constructor() {
     const level$ = this.form
@@ -84,6 +89,18 @@ export class OrgUnitComponent implements OnInit {
     const CHRR$ = this.form
       .get('CHRR')!
       .valueChanges.pipe(startWith(this.form.get('CHRR')!.value));
+    const CHU$ = this.form
+      .get('CHU')!
+      .valueChanges.pipe(startWith(this.form.get('CHU')!.value));
+    const CHRD$ = this.form
+      .get('CHRD')!
+      .valueChanges.pipe(startWith(this.form.get('CHRD')!.value));
+    const FSP$ = this.form
+      .get('FSP')!
+      .valueChanges.pipe(startWith(this.form.get('FSP')!.value));
+    const CSB$ = this.form
+      .get('CSB')!
+      .valueChanges.pipe(startWith(this.form.get('CSB')!.value));
 
     // Control enabling/disabling inputs based on level selected
     level$.subscribe((level) => {
@@ -92,9 +109,20 @@ export class OrgUnitComponent implements OnInit {
     });
 
     // Update options reactively when level, level1, or level2 change
-    combineLatest([level$, level1$, level2$, level3$, level4$, CHRR$])
+    combineLatest([
+      level$,
+      level1$,
+      level2$,
+      level3$,
+      level4$,
+      CHRR$,
+      CHU$,
+      CHRD$,
+      FSP$,
+      CSB$,
+    ])
       .pipe(
-        map(([level, l1, l2, l3, l4, CHRR]) => {
+        map(([level, l1, l2, l3, l4, CHRR, CHU, CHRD, FSP, CSB]) => {
           const lvl = level?.level ?? 0;
           const opts1 = lvl >= 2 ? this.orgService.getUnitsByLevel(2) : [];
           const opts2 =
@@ -105,6 +133,11 @@ export class OrgUnitComponent implements OnInit {
             lvl >= 5 && l3 ? this.orgService.getChildren(5, l3.id) : [];
           const CHRROpts =
             lvl >= 21 && l1 ? this.orgService.getCHRR(l1.id) : [];
+          const CHUOpts = lvl >= 21 && l1 ? this.orgService.getCHU(l2!.id) : [];
+          const CHRDOpts =
+            lvl >= 31 && l1 ? this.orgService.getCHRD(l2!.id) : [];
+          const FSPOpts = lvl >= 51 && l1 ? this.orgService.getFSP(l3!.id) : [];
+          const CSBOpts = lvl >= 41 && l1 ? this.orgService.getCSB(l3!.id) : [];
 
           // Return the options for each level
           return {
@@ -119,6 +152,14 @@ export class OrgUnitComponent implements OnInit {
             l3,
             l4,
             CHRR,
+            CHU,
+            CHRD,
+            FSP,
+            CSB,
+            CSBOpts,
+            FSPOpts,
+            CHRDOpts,
+            CHUOpts,
           };
         }),
         // Use pairwise to compare previous and current emissions
@@ -133,6 +174,10 @@ export class OrgUnitComponent implements OnInit {
               l3: prevL3,
               l4: prevL4,
               CHRR: prevCHRR,
+              CHU: prevCHU,
+              CHRD: prevCHRD,
+              FSP: prevFSP,
+              CSB: prevCSB,
             },
             {
               opts1,
@@ -145,28 +190,60 @@ export class OrgUnitComponent implements OnInit {
               l2,
               l3,
               l4,
-              CHRR,
+              CSBOpts,
+              FSPOpts,
+              CHRDOpts,
+              CHUOpts,
             },
           ]) => {
             // Reset subsequent controls if a higher-level control changes
             if (prevLevel?.level !== level?.level) {
-              for (let lv of ['level1', 'level2', 'level3', 'level4', 'CHRR']) {
+              for (let lv of [
+                'level1',
+                'level2',
+                'level3',
+                'level4',
+                'CHRR',
+                'CHU',
+                'CHRD',
+                'FSP',
+                'CSB',
+              ]) {
                 this.updateLevelReset(lv);
               }
             } else if (prevL1?.id !== l1?.id) {
-              for (let lv of ['level2', 'level3', 'level4', 'CHRR']) {
+              for (let lv of [
+                'level2',
+                'level3',
+                'level4',
+                'CHRR',
+                'CHU',
+                'CHRD',
+                'FSP',
+                'CSB',
+              ]) {
                 this.updateLevelReset(lv);
               }
             } else if (prevL2?.id !== l2?.id) {
-              for (let lv of ['level3', 'level4', 'CHRR']) {
+              for (let lv of [
+                'level3',
+                'level4',
+                'CHRR',
+                'CHU',
+                'CHRD',
+                'FSP',
+                'CSB',
+              ]) {
                 this.updateLevelReset(lv);
               }
             } else if (prevL3?.id !== l3?.id) {
-              for (let lv of ['level4', 'CHRR']) {
+              for (let lv of ['level4', 'CHRR', 'CHU', 'CHRD', 'FSP', 'CSB']) {
                 this.updateLevelReset(lv);
               }
             } else if (prevL4?.id !== l4?.id) {
-              this.form.get('CHRR')?.reset();
+              for (let lv of ['CHRR', 'CHU', 'CHRD', 'FSP', 'CSB']) {
+                this.updateLevelReset(lv);
+              }
             }
 
             // Update options and filtered options
@@ -176,6 +253,18 @@ export class OrgUnitComponent implements OnInit {
             this.level4Options.set(opts4);
             this.CHRROptions.set(
               Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+            );
+            this.CHUOptions.set(
+              Array.isArray(CHUOpts) ? CHUOpts : CHUOpts ? [CHUOpts] : []
+            );
+            this.CHRDOptions.set(
+              Array.isArray(CHRDOpts) ? CHRDOpts : CHRDOpts ? [CHRDOpts] : []
+            );
+            this.FSPOptions.set(
+              Array.isArray(FSPOpts) ? FSPOpts : FSPOpts ? [FSPOpts] : []
+            );
+            this.CSBOptions.set(
+              Array.isArray(CSBOpts) ? CSBOpts : CSBOpts ? [CSBOpts] : []
             );
 
             this.level1FilteredOptions.set(opts1);
@@ -189,27 +278,6 @@ export class OrgUnitComponent implements OnInit {
         )
       )
       .subscribe();
-    // .subscribe(({ opts1, opts2, opts3, opts4, CHRROpts }) => {
-    //   this.level1Options.set(opts1);
-    //   this.level2Options.set(opts2);
-    //   this.level3Options.set(opts3);
-    //   this.level4Options.set(opts4);
-
-    //   this.CHRROptions.set(
-    //     Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
-    //   );
-
-    //   this.level1FilteredOptions.set(opts1);
-    //   this.level2FilteredOptions.set(opts2);
-    //   this.level3FilteredOptions.set(opts3);
-    //   this.level4FilteredOptions.set(opts4);
-    //   this.CHRRFilteredOptions.set(
-    //     Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
-    //   );
-
-    //   // console.log(this.CHRROptions(), 'CHRR Options');
-    //   // console.log(this.CHRRFilteredOptions(), 'CHRR Filtered Options');
-    // });
   }
 
   ngOnInit(): void {
@@ -256,7 +324,6 @@ export class OrgUnitComponent implements OnInit {
       const options = this.level1Options();
       const filtered = this.filter(target, options);
       this.level1FilteredOptions.set(filtered);
-      console.log(filtered, 'Filtered Level 1 Options');
     } else {
       this.level1FilteredOptions.set(this.level1Options());
     }
