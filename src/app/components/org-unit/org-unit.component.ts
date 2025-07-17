@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { combineLatest } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, pairwise, tap } from 'rxjs/operators';
 import { OrganisationUnit } from '../../models/organisationUnit.interface';
 import { OrganisationUnitLevel as OrgUnitLevel } from '../../models/organisationUnitLevel.interface';
 import { OrganizationUnitService as OrgDataService } from '../../services/organization-unit.service';
@@ -58,6 +58,13 @@ export class OrgUnitComponent implements OnInit {
   level4FilteredOptions = signal<OrganisationUnit[]>([]);
   CHRRFilteredOptions = signal<OrganisationUnit[]>([]);
 
+  private prevLevel: any = null;
+  private prevL1: any = null;
+  private prevL2: any = null;
+  private prevL3: any = null;
+  private prevL4: any = null;
+  private prevCHRR: any = null;
+
   constructor() {
     const level$ = this.form
       .get('level')!
@@ -100,30 +107,109 @@ export class OrgUnitComponent implements OnInit {
             lvl >= 21 && l1 ? this.orgService.getCHRR(l1.id) : [];
 
           // Return the options for each level
-          return { opts1, opts2, opts3, opts4, CHRROpts };
-        })
+          return {
+            opts1,
+            opts2,
+            opts3,
+            opts4,
+            CHRROpts,
+            level,
+            l1,
+            l2,
+            l3,
+            l4,
+            CHRR,
+          };
+        }),
+        // Use pairwise to compare previous and current emissions
+        pairwise(),
+        // Detect changes and reset dependent controls
+        tap(
+          ([
+            {
+              level: prevLevel,
+              l1: prevL1,
+              l2: prevL2,
+              l3: prevL3,
+              l4: prevL4,
+              CHRR: prevCHRR,
+            },
+            {
+              opts1,
+              opts2,
+              opts3,
+              opts4,
+              CHRROpts,
+              level,
+              l1,
+              l2,
+              l3,
+              l4,
+              CHRR,
+            },
+          ]) => {
+            // Reset subsequent controls if a higher-level control changes
+            if (prevLevel?.level !== level?.level) {
+              for (let lv of ['level1', 'level2', 'level3', 'level4', 'CHRR']) {
+                this.updateLevelReset(lv);
+              }
+            } else if (prevL1?.id !== l1?.id) {
+              for (let lv of ['level2', 'level3', 'level4', 'CHRR']) {
+                this.updateLevelReset(lv);
+              }
+            } else if (prevL2?.id !== l2?.id) {
+              for (let lv of ['level3', 'level4', 'CHRR']) {
+                this.updateLevelReset(lv);
+              }
+            } else if (prevL3?.id !== l3?.id) {
+              for (let lv of ['level4', 'CHRR']) {
+                this.updateLevelReset(lv);
+              }
+            } else if (prevL4?.id !== l4?.id) {
+              this.form.get('CHRR')?.reset();
+            }
+
+            // Update options and filtered options
+            this.level1Options.set(opts1);
+            this.level2Options.set(opts2);
+            this.level3Options.set(opts3);
+            this.level4Options.set(opts4);
+            this.CHRROptions.set(
+              Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+            );
+
+            this.level1FilteredOptions.set(opts1);
+            this.level2FilteredOptions.set(opts2);
+            this.level3FilteredOptions.set(opts3);
+            this.level4FilteredOptions.set(opts4);
+            this.CHRRFilteredOptions.set(
+              Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+            );
+          }
+        )
       )
-      .subscribe(({ opts1, opts2, opts3, opts4, CHRROpts }) => {
-        this.level1Options.set(opts1);
-        this.level2Options.set(opts2);
-        this.level3Options.set(opts3);
-        this.level4Options.set(opts4);
+      .subscribe();
+    // .subscribe(({ opts1, opts2, opts3, opts4, CHRROpts }) => {
+    //   this.level1Options.set(opts1);
+    //   this.level2Options.set(opts2);
+    //   this.level3Options.set(opts3);
+    //   this.level4Options.set(opts4);
 
-        this.CHRROptions.set(
-          Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
-        );
+    //   this.CHRROptions.set(
+    //     Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+    //   );
 
-        this.level1FilteredOptions.set(opts1);
-        this.level2FilteredOptions.set(opts2);
-        this.level3FilteredOptions.set(opts3);
-        this.level4FilteredOptions.set(opts4);
-        this.CHRRFilteredOptions.set(
-          Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
-        );
+    //   this.level1FilteredOptions.set(opts1);
+    //   this.level2FilteredOptions.set(opts2);
+    //   this.level3FilteredOptions.set(opts3);
+    //   this.level4FilteredOptions.set(opts4);
+    //   this.CHRRFilteredOptions.set(
+    //     Array.isArray(CHRROpts) ? CHRROpts : CHRROpts ? [CHRROpts] : []
+    //   );
 
-        // console.log(this.CHRROptions(), 'CHRR Options');
-        // console.log(this.CHRRFilteredOptions(), 'CHRR Filtered Options');
-      });
+    //   // console.log(this.CHRROptions(), 'CHRR Options');
+    //   // console.log(this.CHRRFilteredOptions(), 'CHRR Filtered Options');
+    // });
   }
 
   ngOnInit(): void {
@@ -156,8 +242,8 @@ export class OrgUnitComponent implements OnInit {
     }
   }
 
-  private updateLevel2Reset() {
-    this.form.get('level2')?.reset();
+  private updateLevelReset(levelForm: string) {
+    this.form.get(levelForm)?.reset();
   }
 
   displayFn = (unit: OrganisationUnit) => unit?.name ?? '';
@@ -170,6 +256,7 @@ export class OrgUnitComponent implements OnInit {
       const options = this.level1Options();
       const filtered = this.filter(target, options);
       this.level1FilteredOptions.set(filtered);
+      console.log(filtered, 'Filtered Level 1 Options');
     } else {
       this.level1FilteredOptions.set(this.level1Options());
     }
