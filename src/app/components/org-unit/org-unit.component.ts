@@ -13,7 +13,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule } from '@angular/forms';
 import { OuExtService } from '../../services/ou-ext.service';
 import { MatButtonModule } from '@angular/material/button'; // Import MatButtonModule if you want to use buttons
-
+import { MatStepperModule } from '@angular/material/stepper';
+import { OrgUnitStoreService } from '../../stores/org-unit.store.service';
+import { OUForm } from '../../models/OUForm.interface';
 // Removed invalid import of MatForm
 @Component({
   selector: 'app-org-unit',
@@ -25,6 +27,7 @@ import { MatButtonModule } from '@angular/material/button'; // Import MatButtonM
     MatOptionModule,
     MatSelectModule,
     MatButtonModule,
+    MatStepperModule,
   ],
   templateUrl: './org-unit.component.html',
   styleUrls: ['./org-unit.component.css'],
@@ -33,6 +36,7 @@ export class OrgUnitComponent implements OnInit {
   fb = inject(FormBuilder);
   orgService = inject(OrgDataService);
   ouExtService = inject(OuExtService);
+  ouStore = inject(OrgUnitStoreService);
 
   form = this.fb.group({
     level: [null as OrgUnitLevel | null, Validators.required],
@@ -453,9 +457,10 @@ export class OrgUnitComponent implements OnInit {
   onSubmit() {
     if (this.form.valid) {
       const formValue = this.form.value;
-      console.log('Form submitted with value:', formValue);
+      this.ouStore.OUForm.set(formValue as OUForm);
       // Handle form submission logic here
       this.form.reset(); // Reset the form after submission
+      console.log(this.ouStore.OUForm());
     } else {
       console.error('Form is invalid');
     }
