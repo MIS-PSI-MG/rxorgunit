@@ -20,6 +20,13 @@ export class OrganizationUnitService {
       (unit) => unit.level === level && unit.parent?.id === parentId
     );
   }
+  getGrandChildren(level: number, parentId: string) {
+    return this.organisationUnits().filter(
+      (unit) =>
+        unit.level === level &&
+        unit.ancestors.some((ancestor) => ancestor.id === parentId)
+    );
+  }
   getCHRR(parentId: string) {
     return this.organisationUnits().find(
       (unit) =>
@@ -29,37 +36,18 @@ export class OrganizationUnitService {
     );
   }
 
-  getCSB(parentId: string) {
+  getCP(CP: string, parentId: string) {
     return this.organisationUnits().find(
       (unit) =>
-        unit.level === 5 &&
-        unit.name.includes('CSB') &&
-        unit.ancestors.some((a) => a.id === parentId)
+        unit.name.includes(CP) && unit.ancestors.some((a) => a.id === parentId)
     );
   }
 
-  getCHRD(parentId: string) {
-    return this.organisationUnits().find(
+  getCHRD_District(parentId: string) {
+    return this.organisationUnits().filter(
       (unit) =>
         unit.level === 5 &&
         unit.name.includes('CHRD') &&
-        unit.ancestors.some((a) => a.id === parentId)
-    );
-  }
-
-  getFSP(parentId: string) {
-    return this.organisationUnits().find(
-      (unit) =>
-        unit.level === 5 &&
-        unit.name.includes('FSP') &&
-        unit.ancestors.some((a) => a.id === parentId)
-    );
-  }
-  getCHU(parentId: string) {
-    return this.organisationUnits().find(
-      (unit) =>
-        unit.level === 5 &&
-        unit.name.includes('CHU') &&
         unit.ancestors.some((a) => a.id === parentId)
     );
   }

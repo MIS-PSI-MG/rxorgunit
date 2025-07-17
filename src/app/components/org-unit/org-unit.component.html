@@ -66,6 +66,24 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CHRD</mat-label>
+    <input
+      matInput
+      formControlName="CHRD"
+      [matAutocomplete]="auto31"
+      (input)="filterCHRDOptions($event)"
+    />
+    <mat-autocomplete
+      #auto31="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
+      @for ( unit of CHRDFilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
     <mat-label>Commune</mat-label>
     <input
       matInput
@@ -79,6 +97,24 @@
       requireSelection="true"
     >
       @for ( unit of level3FilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>CSB</mat-label>
+    <input
+      matInput
+      formControlName="CSB"
+      [matAutocomplete]="auto5"
+      (input)="filterCSBOptions($event)"
+    />
+    <mat-autocomplete
+      #auto5="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
+      @for ( unit of CSBFilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
     </mat-autocomplete>
@@ -98,6 +134,24 @@
       requireSelection="true"
     >
       @for ( unit of level4FilteredOptions(); track unit.id) {
+      <mat-option [value]="unit">{{ unit.name }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Fokontany</mat-label>
+    <input
+      matInput
+      formControlName="Fokontany"
+      [matAutocomplete]="auto6"
+      (input)="filterFokontanyOptions($event)"
+    />
+    <mat-autocomplete
+      #auto6="matAutocomplete"
+      [displayWith]="displayFn"
+      requireSelection="true"
+    >
+      @for ( unit of FokontanyFilteredOptions(); track unit.id) {
       <mat-option [value]="unit">{{ unit.name }}</mat-option>
       }
     </mat-autocomplete>

@@ -19,6 +19,12 @@
       "name": "District"
     },
     {
+      "displayName": "CHRD",
+      "id": "sSDIBMoRBPfe",
+      "level": 31,
+      "name": "CHRD"
+    },
+    {
       "displayName": "Commune",
       "id": "bumGiBvgFvn",
       "level": 4,
@@ -29,6 +35,12 @@
       "id": "NzA6IhTIq2L",
       "level": 5,
       "name": "Formations Sanitaires"
+    },
+    {
+      "displayName": "CSB",
+      "id": "NzA6IhTIq2Le",
+      "level": 41,
+      "name": "CSB"
     },
     {
       "displayName": "Fokontany",
